@@ -11,9 +11,22 @@
 			<div>
 
 				<div class="container">
-					<img style="height: 200px; width: 200px"
+					<!-- <img style="height: 200px; width: 200px"
 						class="my_profile_picture mt-2 mb-2"
-						th:src="@{'/img/'+${contact.image}}" alt="" />
+						th:src="@{'/img/'+${contact.image}}" /> -->
+						
+						
+						<img th:if="${contact.image} eq 'contact.png'"
+						style="height: 200px; width: 200px"
+								class="my_profile_picture mt-2 mb-2" 
+								th:src="@{'/img/'+${contact.image}}"
+								 />
+								 <img th:unless="${contact.image} eq 'contact.png'"
+								 style="height: 200px; width: 200px"
+								class="my_profile_picture mt-2 mb-2" 
+								th:src="@{${image}+'/'+${contact.image}}"
+								 />
+						
 					<h3 th:text="${contact.name + ' ' + contact.secondName}"
 						class="mt-2 mb-2"></h3>
 

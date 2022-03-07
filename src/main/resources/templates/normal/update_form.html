@@ -71,14 +71,25 @@
 								</div>
 									<!-- Contact image -->
 									<div class="container">
-										<img class="img-fluid .my_profile_picture" style="height:75px; width:75px;" th:src="@{'/img/'+${contact.image}}" alt="" />
+
+										  <img th:if="${contact.image} eq 'contact.png'"
+											class="img-fluid .my_profile_picture" 
+											style="height:75px; width:75px;"
+											th:src="@{'/img/'+${contact.image}}"
+											 />
+											 <img th:unless="${contact.image} eq 'contact.png'"
+											class="img-fluid .my_profile_picture" 
+											style="height:75px; width:75px;"
+											th:src="@{${image}+'/'+${contact.image}}"
+								 			/>
+										  
 									</div>
 									
 									<!--image field -->
 								<div class="custom-file mt-1">
 									
 									<input type="file" name="profileImage" id="image">
-								</div>
+								</div>z
 								
 								<!-- Save Button -->
 								<div class="container text-end">

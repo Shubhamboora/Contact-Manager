@@ -14,7 +14,7 @@
 	<name>contactmanager</name>
 	<description>first springboot project</description>
 	<properties>
-		<java.version>17</java.version>
+		<java.version>11</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -52,12 +52,7 @@
     <artifactId>spring-boot-starter-security</artifactId>
 </dependency>
 		
-		<!-- https://mvnrepository.com/artifact/com.heroku.sdk/heroku-maven-plugin -->
-<dependency>
-    <groupId>com.heroku.sdk</groupId>
-    <artifactId>heroku-maven-plugin</artifactId>
-    <version>3.0.4</version>
-</dependency>
+
 		
 		
 		<dependency>
@@ -77,8 +72,9 @@
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-compiler-plugin</artifactId>
     <configuration>
-        <source>17</source>
-        <target>17</target>
+        <source>11</source>
+        <target>11</target>
+        <executable>true</executable>
     </configuration>
 </plugin>
 		</plugins>

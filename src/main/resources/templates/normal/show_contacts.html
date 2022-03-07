@@ -9,11 +9,11 @@
 	<section>
 
 		<!-- Show contacts -->
-		<div class="card me-3 ms-3">
+		<div class="card myCards me-3 ms-3" style="overflow: auto;">
 			<div class="card-body">
 				<h1 class="text-center">Your Contacts</h1>
 
-				<table class="table">
+				<table class="table ">
 					<thead>
 						<tr>
 							<th scope="col">Id</th>
@@ -29,7 +29,17 @@
 						<tr th:each="c : ${contacts}">
 							<th scope="row" th:text="${c.cId}"></th>
 							<td >
-								<img class="my_profile_picture" th:src="@{'/img/'+${c.image}}" alt="" />
+								<img th:if="${c.image} eq 'contact.png'"
+								class="my_profile_picture" 
+								th:src="@{'/img/'+${c.image}}"
+								 />
+								 <img th:unless="${c.image} eq 'contact.png'"
+								class="my_profile_picture" 
+								th:src="@{${image}+'/'+${c.image}}"
+								 />
+								
+								
+								
 								<a th:href="@{'/user/contact/'+${c.cId}}">
 									<span th:text="${c.name +' '+ c.secondName}"></span>
 								</a>

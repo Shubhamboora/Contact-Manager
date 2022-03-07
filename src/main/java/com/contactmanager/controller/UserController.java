@@ -1,6 +1,13 @@
 package com.contactmanager.controller;
 
+
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+
+
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -8,15 +15,22 @@ import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.util.Optional;
 
+
 import javax.servlet.http.HttpSession;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +38,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.thymeleaf.templateresource.ClassLoaderTemplateResource;
 
 import com.contactmanager.dao.UserRepository;
 import com.contactmanager.dao.ContactRepository;
@@ -34,7 +49,11 @@ import com.contactmanager.helper.Message;
 @Controller
 @RequestMapping("/user")
 public class UserController {
+	
+	@Value("${upload.path}")
+    private String path;
 
+	ResourceLoader resourceLoader;
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired
@@ -79,15 +98,12 @@ public class UserController {
 				contact.setImage("contact.png");
 
 			} else {
+				//Processing Image
+				InputStream inputStream = file.getInputStream();
+				Path paths = Paths.get(new FileSystemResource("/home/project/uploads").getFile().getPath()+"/" +file.getOriginalFilename());
+				Files.copy(inputStream, paths, StandardCopyOption.REPLACE_EXISTING);
+				inputStream.close();
 				contact.setImage(file.getOriginalFilename());
-
-				File saveFile = new ClassPathResource("static/img").getFile();
-
-				Path path = Paths.get(saveFile.getAbsolutePath() + File.separator + file.getOriginalFilename());
-
-				Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-				
-
 				
 			}
 			
@@ -116,6 +132,13 @@ public class UserController {
 		m.addAttribute("currentPage", page);
 		m.addAttribute("totalPages", contacts.getTotalPages());
 		
+		Path paths = Paths.get(new FileSystemResource("/uploads/").getFile().getPath());
+
+		System.out.println(paths+"-------------");
+		
+		
+		m.addAttribute("image", paths);
+		
 		return "normal/show_contacts";
 	}
 	
@@ -128,12 +151,13 @@ public class UserController {
 		//Checking weather user is requesting to see his own contact's details or someone else.
 		if(this.user.getId()==contact.getUser().getId()) {
 			model.addAttribute("title", contact.getName());
-			model.addAttribute("contact",contact);
+			model.addAttribute("contact",contact);		
+			Path paths = Paths.get(new FileSystemResource("/uploads/").getFile().getPath());
+			model.addAttribute("image", paths);
 		}else {
 			model.addAttribute("title", "Error");
 		}
-		
-		
+
 		return "normal/describe_contacts";
 	}
 	
@@ -158,11 +182,13 @@ public class UserController {
 	//open update form handler
 	@PostMapping("/update-contact/{cId}")
 	public String updateForm(@PathVariable("cId")Integer cId, Model m) {
-		
+		Path paths = Paths.get(new FileSystemResource("/uploads/").getFile().getPath());
+
 		m.addAttribute("title", "Update Contact");
 		
 		 Contact findById = this.contactRepository.findById(cId).get();
 		 m.addAttribute("contact", findById);
+		 m.addAttribute("image", paths);
 		return "normal/update_form";
 	}
 	
@@ -180,18 +206,17 @@ public class UserController {
 			if(!file.isEmpty()) {
 				//delete old photo
 				if(file.getOriginalFilename() !="contact.png") {
-				File deleteFile = new ClassPathResource("static/img").getFile();
+				File deleteFile = new FileSystemResource("/home/project/uploads").getFile();
 				File file1 = new File(deleteFile, existingdetails.getImage());
 				file1.delete();
 				}
 				//add new photo
 				
-				File saveFile = new ClassPathResource("static/img").getFile();
+				InputStream inputStream = file.getInputStream();
+				Path paths = Paths.get(new FileSystemResource("/home/project/uploads").getFile().getPath()+"/" +file.getOriginalFilename());
+				Files.copy(inputStream, paths, StandardCopyOption.REPLACE_EXISTING);
+				inputStream.close();
 
-				Path path = Paths.get(saveFile.getAbsolutePath() + File.separator + file.getOriginalFilename());
-
-				Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-				
 				contact.setImage(file.getOriginalFilename());
 				session.setAttribute("message", new Message("Your contact is Updated", "success"));
 			}else {
@@ -214,4 +239,14 @@ public class UserController {
 		model.addAttribute("Profile", "Profile - Contact Manager");
 		return "normal/profile";
 	}
+	
+	//Image handler
+		@GetMapping("/image")
+		public String yourImage(Model model) throws IOException {
+			Path paths = Paths.get(new FileSystemResource("/uploads/K.jpg").getFile().getPath());
+
+			model.addAttribute("image", paths);
+			
+			return "normal/image";
+		}
 }
